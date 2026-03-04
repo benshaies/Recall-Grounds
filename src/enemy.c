@@ -94,12 +94,13 @@ int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPo
                     enemy[i].inAttackCooldown = false;
                 }
             }
-
+            
+            //Enemy stops when attacking melee
             if(!enemy[i].isAttacking){
                 enemyFollowPlayer(enemy, playerPos, i);
-                 enemy[i].pos.x += enemy[i].dir.x * enemy[i].speed;
-            enemy[i].pos.y += enemy[i].dir.y * enemy[i].speed;
-            enemy[i].rec = (Rectangle){enemy[i].pos.x, enemy[i].pos.y, 50, 50};
+                enemy[i].pos.x += enemy[i].dir.x * enemy[i].speed;
+                enemy[i].pos.y += enemy[i].dir.y * enemy[i].speed;
+                enemy[i].rec = (Rectangle){enemy[i].pos.x, enemy[i].pos.y, 50, 50};
             }
 
             
@@ -171,7 +172,6 @@ void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i){
     }
 
     if(enemy[i].isAttacking){
-        printf("ATTACKING");
         enemy[i].attackFrameTimer--;
 
         if(enemy[i].attackFrameTimer <= 0){

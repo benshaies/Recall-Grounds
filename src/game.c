@@ -37,6 +37,8 @@ float playerHitStopTime = 0.025f;
 
 float enemySpawnTime = 3.5f;
 
+Rectangle enemyAttackRec;
+
 //Level variables
 const char *fileName = "../arena/arena_walls.csv";
 const char *propsFileName = "../arena/arena_props.csv";
@@ -111,6 +113,19 @@ void gameSetFullscreen(){
     }
 }
 
+//Checks if enemy is attacking, stores attack rec and returns true
+int checkEnemyAttack(){
+    int returnValue = -1;
+    for(int i = 0; i < ENEMY_NUM; i++){
+        if(enemy[i].active && enemy[i].isAttacking){
+            returnValue = i;
+        }
+
+    }
+
+    return returnValue;
+}
+
 
 
 void gameUpdate(){
@@ -122,23 +137,33 @@ void gameUpdate(){
         if(IsKeyPressed(KEY_TAB)){
             startGame = !startGame;
         }
-        if(startGame){
-            spawnEnemies();
+        //Simple debug enemy spawner
+        if(IsKeyPressed(KEY_G)){
+            enemyInit(enemy, player.pos);
         }
         if(IsKeyPressed(KEY_F1)){
             debugMode = !debugMode;
         }
     
         int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos);
-        Vector2 enemyDir= {0,0};
         //Returns -1 if enemy is hit to start camera shake and hitstop
         if(enemyUpdateReturn == -1){
             screenShake = screenShakeFrameBase;
             hitStopTimer = hitStopTime;
         }
 
-        playerUpdate(&player, game.colliderRecs, game.colliderCount, enemyDir);
+        if(player.state == HURT){
+            screenShake = screenShakeFrameBase;
+            hitStopTimer = hitStopTime;
+        }
+
+        int checkEnemyAttackReturn = checkEnemyAttack();
+        //Player update trakes in enemy attack rectangle and also bool to see if any enemies are attacking 
+        //the checkEnemyAttack function returns an index with the enemy attacking if one is, returns -1 otherwise
+        //We use this index to pass in the proper attack rectangle and create a booleon to pass in too
+        playerUpdate(&player, game.colliderRecs, game.colliderCount, enemy[checkEnemyAttackReturn].attackRec, (checkEnemyAttackReturn != -1));
         updateCamera();
+
 
     }
     else{

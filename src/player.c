@@ -62,19 +62,22 @@ void playerInit(Player *player){
 }
 
 
-void playerUpdate(Player *player, Rectangle rec[], int recNum, Vector2 enemyDir){
+void playerUpdate(Player *player, Rectangle rec[], int recNum, Rectangle enemyAttackRec, bool isEnemyAttacking){
     playerCollisions(player, rec, recNum);
 
 
-    playerMovement(player);
+    playerMovement(player, enemyAttackRec, isEnemyAttacking);
 
     axeUpdate(player, rec, recNum);
 
-    player->knockbackDir = enemyDir;
+    //If enemy is attacking, checks if player gets hit by the attack 
+    if(isEnemyAttacking){
+        checkPlayerHit(player, enemyAttackRec);
+    }
     
 }
 
-void playerMovement(Player *player){
+void playerMovement(Player *player, Rectangle enemyAttackRec, bool isEnemyAttacking){
     
     switch (player->state){
         case NOTHING:
@@ -89,17 +92,33 @@ void playerMovement(Player *player){
             }
             break;
         case HURT:
+            player->pos.x += player->knockbackDir.x * 15;
+            player->pos.y += player->knockbackDir.y * 15;
+
+            playerKnockbackFrames--;
+
+            if(playerKnockbackFrames<= 0){
+                player->state = IMMUNITY;
+                playerKnockbackFrames = playerKnockbackFramesBase;
+            }
         
             break;
 
         case IMMUNITY:
+            playerImmunityFrames--;
+
+            if(playerImmunityFrames <= 0){
+                player->state = NOTHING;
+                playerImmunityFrames = playerImmunityFramesBase;
+
+            }
+            
            
             break;
     }
     if(player->axe.state != HOLDING && IsKeyPressed(KEY_SPACE) && player->state != HURT && player->state != IMMUNITY){
         player->state = PULLING_IN;
     }
-
 
     if(player->state != PULLING_IN){
         //Get input
@@ -144,11 +163,7 @@ void playerMovement(Player *player){
 
 }
 
-void playerHit(Player *player){
-    if(playerKnockbackFrames > 0){
 
-    }
-}
 
 void playerCollisions(Player *player, Rectangle rec[], int recNum){
     for(int i = 0; i < recNum; i++){
@@ -177,9 +192,17 @@ void playerCollisions(Player *player, Rectangle rec[], int recNum){
     }
 }
 
-void setCurrentDrawRotation(Player *player){
-    
+bool checkPlayerHit(Player *player, Rectangle enemyAttackRec){
+    if(CheckCollisionRecs(enemyAttackRec, player->rec)){
+        player->state = HURT;
+        player->knockbackDir = Vector2Normalize((Vector2){player->pos.x - enemyAttackRec.x + enemyAttackRec.width/2, player->pos.y - enemyAttackRec.y + enemyAttackRec.height/2});
+        return true;
+    }
+    else{
+        return false;
+    }
 }
+
 
 void axeUpdate(Player *player, Rectangle rec[], int recNum){
     switch (player->axe.state){
@@ -273,20 +296,16 @@ void playerDraw(Player *player){
 
 
     if(player->axe.state == HOLDING){
-        DrawTexturePro(axeBaseTexture, (Rectangle){0,0,16,16}, drawRec, (Vector2){8,8}, 1, WHITE);
+        DrawTexturePro(axeBaseTexture, (Rectangle){0,0,16,16}, drawRec, (Vector2){0,0}, 1, WHITE);
     }
     else if(player->axe.state == DONE_THROW){
-        DrawTexturePro(axeBaseTexture, (Rectangle){0,0,16,16}, drawRec, (Vector2){8,8}, player->axe.currentDrawRotation, WHITE);
+        DrawTexturePro(axeBaseTexture, (Rectangle){0,0,16,16}, drawRec, (Vector2){25,25}, player->axe.currentDrawRotation, WHITE);
     }
     else{
         int direction = 1;
         player->axe.currentDrawRotation = GetRandomValue(0,360);
         playAnimation(&player->axe.anim, drawRec, direction, 0.05);
     }
-    
-    //DrawRectangleRec(player->axe.rec, BLUE);·
-
-
 
     switch (player->animState){
         case IDLE:
