@@ -79,12 +79,13 @@ void enemyFollowPlayer(Enemy enemy[], Vector2 playerPos, int i){
     
 }   
 
-int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos){
+int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos, Rectangle rec[], int recNum){
     int returnValue = 0;
     for(int i = 0; i < ENEMY_NUM; i++){
         if(enemy[i].active){
 
             enemyAttackUpdate(enemy, playerPos, i);
+            enemyCollisions(enemy, rec, recNum, i);
 
             //Update the attack cooldown
             if(enemy[i].inAttackCooldown){
@@ -177,7 +178,31 @@ void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i){
     }
 }
 
-void enemyCollisions(Enemy enemy[], int i){
+void enemyCollisions(Enemy enemy[], Rectangle rec[], int recNum, int i){
+    for (int x = 0; x < recNum; x++) {
+        if (CheckCollisionRecs(enemy[i].rec, rec[x])) {
+            Rectangle collisionRec = GetCollisionRec(enemy[i].rec, rec[x]);
+
+            // Horizontal collision (thinner overlap = side hit)
+            if (collisionRec.width < collisionRec.height) {
+                if (enemy[i].rec.x < rec[x].x)
+                    enemy[i].pos.x -= collisionRec.width;  // push left
+                else
+                    enemy[i].pos.x += collisionRec.width;  // push right
+            }
+            // Vertical collision (shorter overlap = top/bottom hit)
+            else if (collisionRec.height < collisionRec.width) {
+                if (enemy[i].rec.y < rec[x].y)
+                    enemy[i].pos.y -= collisionRec.height;  // push up
+                else
+                    enemy[i].pos.y += collisionRec.height;  // push down
+            }
+
+            // Sync rectangle position to match updated pos
+            enemy[i].rec.x = enemy[i].pos.x;
+            enemy[i].rec.y = enemy[i].pos.y;
+        }
+}
     
 }
 

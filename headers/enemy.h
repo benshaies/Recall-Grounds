@@ -46,11 +46,11 @@
 
     void enemyFollowPlayer(Enemy enemy[], Vector2 playerPos, int i);
 
-    int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos);
+    int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos, Rectangle rec[], int recNum);
 
     void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i);
 
-    void enemyCollisions(Enemy enemy[], int i);
+    void enemyCollisions(Enemy enemy[], Rectangle rec[], int recNum, int i);
 
     void enemyDraw(Enemy enemy[]);
 

@@ -150,8 +150,9 @@ void gameUpdate(){
         if(IsKeyPressed(KEY_F1)){
             debugMode = !debugMode;
         }
-    
-        int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos);
+        
+
+        int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos, game.colliderRecs, game.colliderCount);
         //Returns -1 if enemy is hit to start camera shake and hitstop
         if(enemyUpdateReturn == -1){
             screenShake = screenShakeFrameBase;
