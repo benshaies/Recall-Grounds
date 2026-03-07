@@ -21,7 +21,6 @@ Vector2 worldMouse;
 
 Enemy enemy[ENEMY_NUM];
 
-bool startGame = false;
 bool debugMode = false;
 
 Camera2D camera;
@@ -52,6 +51,13 @@ const char *floorFileName = "../arena/arena_floor.csv";
 
 int temp = 0;
 
+//Game wave system varaibles
+bool startGame = false;
+
+bool displayWaveNum = false;
+float waveDisplayTimer = 0.0f;
+float waveDisplayTimerBase = 3.0f;
+
 void gameInit(){
     InitWindow(GAME_WIDTH, GAME_HEIGHT, "Project Recall");  
     SetTargetFPS(60);
@@ -80,6 +86,8 @@ void gameInit(){
     camera.offset = (Vector2){GAME_WIDTH/2, GAME_HEIGHT/2};
     camera.target = player.pos;
     camera.zoom = 0.75f;
+
+    game.currentWave = 1;
 }
 
 void cameraShake(){
@@ -132,7 +140,22 @@ int checkEnemyAttack(){
     return returnValue;
 }
 
+void updateWaveSystem(){
+    if(startGame){
+        
+        switch(game.playState){
+            case NOT_STARTED:
+                
+            case WAVE_DISPLAY:
 
+            case WAVE_ACTIVE:
+
+            case WAVE_DONE:
+
+        }
+        
+    }
+}
 
 void gameUpdate(){
     gameSetFullscreen();
@@ -140,7 +163,7 @@ void gameUpdate(){
 
     if(hitStopTimer <= 0){
 
-        if(IsKeyPressed(KEY_TAB)){
+        if(IsKeyPressed(KEY_ENTER)){
             startGame = !startGame;
         }
         //Simple debug enemy spawner
