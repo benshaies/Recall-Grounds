@@ -37,7 +37,6 @@ float hitStopTimer = 0;
 bool playerScreenShakeStarted = false;
 float hitStopTimePlayer = 1.0f;
 
-
 float playerHitStopTime = 0.025f;
 
 float enemySpawnTime = 2.5f;
@@ -54,6 +53,8 @@ int temp = 0;
 //Game wave system varaibles
 bool startGame = false;
 
+//Health rectangles
+Rectangle healthRecs[3];
 
 void gameInit(){
     InitWindow(GAME_WIDTH, GAME_HEIGHT, "Project Recall");  
@@ -70,6 +71,11 @@ void gameInit(){
     csvToArray(game.levelArray, fileName);
     csvToArray(game.propsArray, propsFileName);
     csvToArray(game.floorArray, floorFileName);
+
+    //Init health recs
+    healthRecs[0] = (Rectangle){10,5, 40, 40};
+    healthRecs[1] = (Rectangle){55, 5, 40, 40};
+    healthRecs[2] = (Rectangle){95, 5, 40, 40};
 
     //Create collision Recs
     game.colliderCount = getWallAmount(game.levelArray);
@@ -138,23 +144,22 @@ int checkEnemyAttack(){
 void gameUpdate(){
     gameSetFullscreen();
 
-
     if(hitStopTimer <= 0){
 
         if(IsKeyPressed(KEY_ENTER)){
             startGame = !startGame;
         }
+        if(startGame){
+            spawnEnemies();
+        }
+
         //Simple debug enemy spawner
         if(IsKeyPressed(KEY_G)){
-            enemyInit(enemy, player.pos, 1);
+            enemyInit(enemy, player.pos, 2);
         }
         if(IsKeyPressed(KEY_F1)){
             debugMode = !debugMode;
         }
-
-        //Update waves
-        updateWaveSystem();
-        
 
         int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos, game.colliderRecs, game.colliderCount);
         //Returns -1 if enemy is hit to start camera shake and hitstop
@@ -174,11 +179,11 @@ void gameUpdate(){
         if(player.state != HURT){
             playerScreenShakeStarted = false;
         }
-
+    
         int checkEnemyAttackReturn = checkEnemyAttack();
 
         
-        //Player update trakes in enemy attack rectangle and also bool to see if any enemies are attacking 
+        //Player update takes in enemy attack rectangle and also bool to see if any enemies are attacking 
         //the checkEnemyAttack function returns an index with the enemy attacking if one is, returns -1 otherwise
         //We use this index to pass in the proper attack rectangle and create a booleon to pass in too
 
@@ -199,7 +204,7 @@ void gameUpdate(){
 void spawnEnemies(){
     game.enemySpawnTimer += GetFrameTime();
     if(game.enemySpawnTimer >= enemySpawnTime){
-        enemyInit(enemy, player.pos, 1);
+        enemyInit(enemy, player.pos, GetRandomValue(1,2));
         game.enemySpawnTimer = 0;
     }
 }
@@ -260,6 +265,24 @@ void gameDraw(){
             enemyDraw(enemy);
 
         EndMode2D();
+
+        // Draw player health
+        for (int i = 0; i < 3; i++) {
+            int threshold = (i + 1) * 2;
+            Texture2D tex;
+
+            if (player.lives >= threshold) {
+                tex = heartTexture;
+            } else if (player.lives == threshold - 1) {
+                tex = heartHalfTexture;
+            } else {
+                tex = heartEmptyTexture;
+            }
+
+            DrawTexturePro(tex, (Rectangle){0,0,16,16}, healthRecs[i], (Vector2){0,0}, 0.0, WHITE);
+        }
+       
+        
         
 
         if(debugMode){

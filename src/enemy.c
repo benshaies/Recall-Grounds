@@ -23,6 +23,7 @@ void enemyInit(Enemy enemy[], Vector2 playerPos, int type){
             enemy[i].speed = GetRandomValue(2,4);
             enemy[i].dir = Vector2Normalize((Vector2){playerPos.x - enemy[i].pos.x, playerPos.y - enemy[i].pos.y});
             enemy[i].active = true;
+            
             enemy[i].baseHealth = 100.0f;
             enemy[i].state = NOT_HIT;
             enemy[i].knockbackDir = (Vector2){0,0};
@@ -32,22 +33,25 @@ void enemyInit(Enemy enemy[], Vector2 playerPos, int type){
             enemy[i].randomFollowDir = GetRandomValue(1,4);
             enemy[i].reachedFollowDir = false;
 
-            
-            if(enemy[i].type == 1){ // Normal
-                animationInit(&enemy[i].anim, 0, enemyIdleTexture, 16, 4, 0, 0);
-                //Attack stuff
-                enemy[i].isAttacking = false;
-                enemy[i].attackRec = (Rectangle){0,0,0,0};
-                enemy[i].attackFrameBase = 60;
-                enemy[i].attackFrameTimer = 60;
-                enemy[i].attackCooldownBase = 2.0f;
-                enemy[i].attackCooldownTimer = 2.0f;
-                enemy[i].inAttackCooldown = false;
-            }
-            else if(enemy[i].type == 2){ //Exploes on death
+            //Attack stuff
+            enemy[i].isAttacking = false;
+            enemy[i].attackRec = (Rectangle){0,0,0,0};
+            enemy[i].attackFrameBase = 60;
+            enemy[i].attackFrameTimer = 60;
+            enemy[i].attackCooldownBase = 2.0f;
+            enemy[i].attackCooldownTimer = 2.0f;
+            enemy[i].inAttackCooldown = false;
 
+            
+            if(type == 1){ // Normal
+                animationInit(&enemy[i].anim, 0, enemyIdleTexture, 16, 4, 0, 0);
+                enemy[i].health = 150.0f;
             }
-            else if(enemy[i].type == 3){ //Only hit by recall
+            else if(enemy[i].type == 2){ //Shield enemy
+                animationInit(&enemy[i].anim, 0, enemy2RunTexture, 16, 9, 0, 0);
+                enemy[i].health = 50.0f;
+            }
+            else if(enemy[i].type == 3){ //Explodes when dead
 
             }
             
@@ -120,13 +124,17 @@ int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPo
                 if(axe.state == 3){
                     damageMultiplier = 1.5f;
                 }
-                enemy[i].knockbackDir = Vector2Normalize(axe.dir);
 
-                enemy[i].color = WHITE;
-                enemy[i].health -= axe.damage * damageMultiplier;
-                enemy[i].state = HIT;
+                if(enemy[i].type == 1 || (enemy[i].type == 2 && axe.state == RECALL)){
+                    enemy[i].knockbackDir = Vector2Normalize(axe.dir);
 
-                returnValue = -1;
+                    enemy[i].color = WHITE;
+                    enemy[i].health -= axe.damage * damageMultiplier;
+                    enemy[i].state = HIT;
+
+                    returnValue = -1;
+                }
+                
                 break;
             }
 
@@ -170,7 +178,6 @@ int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPo
 
 void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i){
 
-    if(enemy[i].type == 1){
         if(!enemy[i].isAttacking && CheckCollisionCircleRec(playerPos, enemyMeleeAttackRadius, enemy[i].rec) && !enemy[i].inAttackCooldown){
         enemy[i].isAttacking = true;
         Vector2 dirToPlayer = Vector2Normalize((Vector2){playerPos.x - enemy[i].pos.x, playerPos.y - enemy[i].pos.y});
@@ -186,7 +193,6 @@ void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i){
                 enemy[i].inAttackCooldown = true;
             }
         }
-    }
     
 }
 
@@ -227,9 +233,8 @@ void enemyDraw(Enemy enemy[]){
             if(enemy[i].isAttacking){
                 DrawRectangleRec(enemy[i].attackRec, (Color){255,0,0, enemy[i].attackFrameTimer * 4});
             }
-
+            int animDir;
             if(!enemy[i].state == HIT){
-                int animDir;
                 if(enemy[i].dir.x >= 0){
                     animDir = 1;
                 }
@@ -239,7 +244,14 @@ void enemyDraw(Enemy enemy[]){
                 playAnimation(&enemy[i].anim, animRec, animDir, 0.15);
             }
             else{
-                DrawTexturePro(enemyHitTexture, (Rectangle){0,0,16,16}, animRec, (Vector2){0,0}, 0.0f, WHITE);
+
+                if(enemy[i].type ==  1){
+                    DrawTexturePro(enemyHitTexture, (Rectangle){0,0,16,16}, animRec, (Vector2){0,0}, animDir, WHITE);
+                }
+                else if(enemy[i].type == 2){
+                    DrawTexturePro(enemy2HitTexture, (Rectangle){0,0,16,16}, animRec, (Vector2){0,0}, animDir, WHITE);
+                }
+                
             }
 
             DrawRectangle(enemy[i].rec.x, enemy[i].rec.y - 50, (int)(enemy[i].rec.width * (enemy[i].health/enemy[i].baseHealth)), 20, WHITE );

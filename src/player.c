@@ -34,8 +34,8 @@ void playerInit(Player *player){
     player->speed = 5.0f;
     player->dir = (Vector2){0,0};
     player->state = NOTHING;
-    player->lives = 3;
-    player->baseLives = 3;
+    player->lives = 6;
+    player->baseLives = 6;
     player->knockbackDir = (Vector2){0,0};
 
     //Weapon stuff
@@ -98,6 +98,7 @@ void playerMovement(Player *player, Rectangle enemyAttackRec, bool isEnemyAttack
 
             if(playerKnockbackFrames<= 0){
                 player->state = IMMUNITY;
+                player->lives--;
                 playerKnockbackFrames = playerKnockbackFramesBase;
             }
         
@@ -307,7 +308,11 @@ void playerDraw(Player *player){
         playAnimation(&player->axe.anim, drawRec, direction, 0.05);
     }
 
-    switch (player->animState){
+    if(player->state == HURT){
+        DrawTexturePro(playerHurtTexture, (Rectangle){0,0,16,16}, player->rec, (Vector2){0,0}, 0.0f, WHITE);
+    }
+    else{
+        switch (player->animState){
         case IDLE:
             playAnimation(&player->playerIdleAnim, player->rec, player->animationDir, 0.25);
             break;
@@ -315,7 +320,9 @@ void playerDraw(Player *player){
         case RUNNING:
             playAnimation(&player->playerSideAnim, player->rec, player->animationDir, 0.15);
             break;
+        }
     }
+    
 
 
 }
