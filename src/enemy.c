@@ -45,10 +45,12 @@ void enemyInit(Enemy enemy[], Vector2 playerPos, int type){
             
             if(type == 1){ // Normal
                 animationInit(&enemy[i].anim, 0, enemyIdleTexture, 16, 4, 0, 0);
+                animationInit(&enemy[i].attackAnim, 0, enemyOneAttackTexture, 16, 7, 0, 0);
                 enemy[i].health = 150.0f;
             }
             else if(enemy[i].type == 2){ //Shield enemy
                 animationInit(&enemy[i].anim, 0, enemy2RunTexture, 16, 9, 0, 0);
+                animationInit(&enemy[i].attackAnim, 0, enemyOneAttackTexture, 16, 7, 0, 0);
                 enemy[i].health = 50.0f;
             }
             else if(enemy[i].type == 3){ //Explodes when dead
@@ -90,7 +92,7 @@ void enemyFollowPlayer(Enemy enemy[], Vector2 playerPos, int i){
     
 }   
 
-int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos, Rectangle rec[], int recNum){
+int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos, Rectangle rec[], int recNum, ParticleSystem *ps){
     int returnValue = 0;
     for(int i = 0; i < ENEMY_NUM; i++){
         if(enemy[i].active){
@@ -167,7 +169,7 @@ int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPo
 
             //Remove enemy once health is 0
             if(enemy[i].health <= 0){
-                enemyDelete(enemy, i);
+                enemyDelete(enemy, i, ps);
                 returnValue = 1;
             }
 
@@ -232,7 +234,8 @@ void enemyDraw(Enemy enemy[]){
             Rectangle animRec = {enemy[i].rec.x - 25, enemy[i].rec.y - 25, enemy[i].rec.width + 50, enemy[i].rec.height + 50};
             
             if(enemy[i].isAttacking){
-                DrawRectangleRec(enemy[i].attackRec, (Color){255,0,0, enemy[i].attackFrameTimer * 4});
+                DrawRectangleRec(enemy[i].attackRec, (Color){255,255,255, enemy[i].attackFrameTimer * 4});
+
             }
             int animDir;
             if(!enemy[i].state == HIT){
@@ -252,7 +255,6 @@ void enemyDraw(Enemy enemy[]){
                 else if(enemy[i].type == 2){
                     DrawTexturePro(enemy2HitTexture, (Rectangle){0,0,16,16}, animRec, (Vector2){0,0}, animDir, WHITE);
                 }
-                
             }
 
             DrawRectangle(enemy[i].rec.x, enemy[i].rec.y - 50, (int)(enemy[i].rec.width * (enemy[i].health/enemy[i].baseHealth)), 20, WHITE );
@@ -260,7 +262,8 @@ void enemyDraw(Enemy enemy[]){
     }
 }
 
-void enemyDelete(Enemy enemy[], int i){
+void enemyDelete(Enemy enemy[], int i, ParticleSystem *ps){
+    
     enemy[i].active = false;
     enemy[i].dir = (Vector2){0,0};
     enemy[i].pos = (Vector2){0,0};
@@ -268,4 +271,7 @@ void enemyDelete(Enemy enemy[], int i){
     enemy[i].speed = 0;
     enemy[i].health = -1;
     enemy[i].state = NOT_HIT;
+    
+
+    
 }

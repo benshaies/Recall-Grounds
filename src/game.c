@@ -85,7 +85,7 @@ void gameInit(){
     target = LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT);
     SetTextureFilter(target.texture, TEXTURE_FILTER_POINT); 
 
-    //HideCursor();
+    HideCursor();
 
     //Loads csv values into array
     csvToArray(game.levelArray, fileName);
@@ -191,19 +191,19 @@ void manageParticles(){
 
     //Boomerang particles
     if( (player.axe.state == THROWN || player.axe.state == RECALL)){
-        spawnParticles(&ps, player.axe.pos, GetRandomValue(1,3) * 0.15, boomerangTrailColor, (Vector2){-player.axe.dir.x * GetRandomValue(1,3), GetRandomValue(0,2)}, GetRandomValue(1,3));
-        spawnParticles(&ps, player.axe.pos, GetRandomValue(1,3) * 0.15, boomerangTrailColor2, (Vector2){-player.axe.dir.x * GetRandomValue(1,3), GetRandomValue(0,2)}, GetRandomValue(1,3));
+        spawnParticles(&ps, player.axe.pos, GetRandomValue(1,3) * 0.15, boomerangTrailColor, (Vector2){GetRandomValue(1,3), GetRandomValue(0,2)}, GetRandomValue(1,3));
+        spawnParticles(&ps, player.axe.pos, GetRandomValue(1,3) * 0.15, boomerangTrailColor2, (Vector2){ GetRandomValue(1,3), GetRandomValue(0,2)}, GetRandomValue(1,3));
     }
 
-    //Enemy particles
+    //Enemy particles when hit
     for(int i = 0; i < ENEMY_NUM; i++){
 
         if(!enemy[i].active)continue;;
         if(enemy[i].state != HIT) continue;
 
-        spawnParticles(&ps, enemy[i].pos, GetRandomValue(1,3) * 0.33, enemyHitParticleColor, (Vector2){GetRandomValue(-10,10), GetRandomValue(-10,10)}, GetRandomValue(2,6));
-        spawnParticles(&ps, enemy[i].pos, GetRandomValue(1,3) * 0.33, enemyHitParticleColor, (Vector2){GetRandomValue(-10,10), GetRandomValue(-10,10)}, GetRandomValue(2,6));
-        spawnParticles(&ps, enemy[i].pos, GetRandomValue(1,3) * 0.33, enemyHitParticleColor, (Vector2){GetRandomValue(-10,10), GetRandomValue(-10,10)}, GetRandomValue(2,6));
+        spawnParticles(&ps, enemy[i].pos, GetRandomValue(1,3) * 1, enemyHitParticleColor, (Vector2){GetRandomValue(-10,10), GetRandomValue(-10,10)}, GetRandomValue(2,6));
+        spawnParticles(&ps, enemy[i].pos, GetRandomValue(1,3) * 1, enemyHitParticleColor, (Vector2){GetRandomValue(-10,10), GetRandomValue(-10,10)}, GetRandomValue(2,6));
+        spawnParticles(&ps, enemy[i].pos, GetRandomValue(1,3) * 1, enemyHitParticleColor, (Vector2){GetRandomValue(-10,10), GetRandomValue(-10,10)}, GetRandomValue(2,6));
 
 
     }    
@@ -216,15 +216,13 @@ void gamePlayingUpdate(){
     updateScore();
 
     if(hitStopTimer <= 0){
-
+    
         if(IsKeyPressed(KEY_ENTER)){
             startGame = !startGame;
         }
         if(startGame){
             spawnEnemies();
         }
-
-
 
         //Simple debug enemy spawner
         if(IsKeyPressed(KEY_G)){
@@ -234,15 +232,16 @@ void gamePlayingUpdate(){
             debugMode = !debugMode;
         }
 
-        int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos, game.colliderRecs, game.colliderCount);
+        int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos, game.colliderRecs, game.colliderCount, &ps);
         //Returns -1 if enemy is hit to start camera shake and hitstop, returns 1 if enemy is killed
         if(enemyUpdateReturn == -1){ // Enemy hit
             screenShake = screenShakeFrameBase;
             hitStopTimer = hitStopTime;
         }
-        //Enemy killed
+        //Enemy killed and spawn particles
         else if(enemyUpdateReturn == 1){
             game.enemiesKilled++;
+            spawnParticlesExpandingRing(&ps, player.axe.pos, 0.4, enemyHitParticleColor, 5, GetRandomValue(10,20), GetRandomValue(30, 50));
         }
 
         //If player hurt and screenshake hasnt started, start it once
@@ -291,7 +290,7 @@ void gameUpdate(){
             break;
         case TESTING:
             if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-                spawnParticles(&ps, mousePos, 5.0f, WHITE, (Vector2){GetRandomValue(-3,3), -5}, 10.0f);
+                spawnParticles(&ps, worldMouse, 0.5, WHITE, (Vector2){GetRandomValue(-3,3), -5}, 10.0f);
             }
             updateParticles(&ps);
             break;

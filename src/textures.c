@@ -1,7 +1,7 @@
 #include "../headers/textures.h"
 
 Texture2D playerIdleTexture, playerSideTexture, levelTilesetTexture, playerHurtTexture;
-Texture2D enemyIdleTexture, enemyHitTexture, enemy2RunTexture, enemy2HitTexture;
+Texture2D enemyIdleTexture, enemyHitTexture, enemy2RunTexture, enemy2HitTexture, enemyOneAttackTexture;
 Texture2D cursorTexture;
 Texture2D axeThrowTexture, axeBaseTexture;
 Texture2D heartTexture, heartHalfTexture, heartEmptyTexture;
@@ -15,6 +15,7 @@ void texturesLoad(){
     enemyHitTexture = LoadTexture("../assets/enemyHit.png");
     enemy2RunTexture = LoadTexture("../assets/enemy2Run.png");
     enemy2HitTexture = LoadTexture("../assets/enemy2Hit.png");
+    enemyOneAttackTexture = LoadTexture("../assets/enemyOneAttack.png");
 
     cursorTexture = LoadTexture("../assets/cursor.png");
 
@@ -40,6 +41,7 @@ void texturesUnload(){
     UnloadTexture(enemyHitTexture);
     UnloadTexture(enemy2RunTexture);
     UnloadTexture(enemy2HitTexture);
+    UnloadTexture(enemyOneAttackTexture);
 
     UnloadTexture(cursorTexture);
 

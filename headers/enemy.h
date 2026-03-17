@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "player.h"
 #include "animation.h"
+#include "particles.h"
 
     #define ENEMY_NUM 25
 
@@ -29,6 +30,7 @@
         bool reachedFollowDir;
 
         Animation anim;
+        Animation attackAnim;
 
         bool isAttacking;
         Rectangle attackRec;
@@ -48,7 +50,7 @@
 
     void enemyFollowPlayer(Enemy enemy[], Vector2 playerPos, int i);
 
-    int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos, Rectangle rec[], int recNum);
+    int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPos, Rectangle rec[], int recNum, ParticleSystem *ps);
 
     void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i);
 
@@ -56,6 +58,7 @@
 
     void enemyDraw(Enemy enemy[]);
 
-    void enemyDelete(Enemy enemy[], int i);
+    void enemyDelete(Enemy enemy[], int i, ParticleSystem *ps);
+
 
 #endif
