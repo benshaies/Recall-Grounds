@@ -9,6 +9,7 @@
 #include "stdlib.h"
 #include "../headers/particles.h"
 #include <string.h>
+#include "../headers/upgrade.h"
 
 const int GAME_WIDTH = 1280;
 const int GAME_HEIGHT = 720;
@@ -79,13 +80,14 @@ bool playerHitParticleStarted = false;
 bool isBoomerangDeflected = false;
 
 //Upgrade screen stuff
-Rectangle baseRec = {340, 210, 600, 300};
+Rectangle baseRec = {290, 160, 700, 400};
+UpgradeScreen upgradeScreen;
 
 void gameInit(){
     InitWindow(GAME_WIDTH, GAME_HEIGHT, "Project Recall");  
     SetTargetFPS(60);
 
-    game.state = PLAYING;
+    game.state = TESTING;
     memset(&ps, 0, sizeof(ParticleSystem));
 
     texturesLoad();
@@ -340,8 +342,11 @@ void gameUpdate(){
             gameUpgradeScreenUpdate();
             break;
         case TESTING:
+            if(IsKeyPressed(KEY_R)){
+                resetUpgrades(&upgradeScreen);
+            }
             if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-                spawnParticles(&ps, worldMouse, 0.5, WHITE, (Vector2){GetRandomValue(-3,3), -5}, 10.0f);
+                createUpgrades(&upgradeScreen);
             }
             updateParticles(&ps);
             break;
