@@ -28,6 +28,7 @@
         Rectangle baseRec;
         float openingProgress;
         Rectangle upgradeRecs[3];
+        Rectangle baseUpgradeRecs[3];
         bool isHovering[3];
         Upgrades upgrade[3];
         int upgradeLevels[NUMBER_OF_UPGRADES];
