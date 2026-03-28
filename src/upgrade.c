@@ -1,13 +1,17 @@
 #include "../headers/upgrade.h"
 #include "stdio.h"
 #include "../headers/textures.h"
+#include <math.h>
 
 Rectangle finalBaseRec = {290, 160, 700, 400};
+float openingSpeed = 2.0f;
 
 void upgradeStructInit(UpgradeScreen *up){
 
-    up->baseRec = (Rectangle){290, 160, 700, 400};
-    up->openingProgress = 0.0f;  //from 0.0 - 1.0
+    up->openingProgress[0] = 0.0f;  //from 0.0 - 1.0
+    up->openingProgress[1] = 0.0f;
+    up->openingProgress[2] = 0.0f;
+    up->currentOpening = 0;
 
     up->upgradeRecs[0] = (Rectangle){310, 180, 206, 360};
     up->upgradeRecs[1] = (Rectangle){536, 180, 206, 360};
@@ -45,18 +49,41 @@ void createUpgrades(UpgradeScreen *up){
     }
 }
 
+void resetUpgradeUI(UpgradeScreen *up){
+    for(int i = 0; i < 3; i++){
+        up->openingProgress[i] = 0.0f;
+        up->isHovering[i] = false;
+        up->upgradeRecs[i] = up->baseUpgradeRecs[i];
+    }
+
+    up->currentOpening = 0;
+    up->selectedUpgrade = -1;
+    up->state = OPENING;
+}
+
 void updateUpgradeScreen(UpgradeScreen *up, Vector2 mousePos){
     switch (up->state){
         case NOT_ACTIVE:
             break;
         case OPENING:
-            up->openingProgress += 4.0f * GetFrameTime();
-            if(up->openingProgress > 1.0f){
-                up->openingProgress = 1.0f;
+            
+            if(up->currentOpening < 3){
+                up->openingProgress[up->currentOpening] += openingSpeed * GetFrameTime();
+                if(up->openingProgress[up->currentOpening] >= 1.0f){
+                    up->openingProgress[up->currentOpening] = 1.0f;
+                    up->currentOpening++;
+                }
+                
+            }
+
+            if(up->currentOpening >= 3){
                 up->state = DONE_OPENING;
             }
             break;
         case DONE_OPENING:
+
+
+
             for(int i = 0; i < 3; i++){
                 if(CheckCollisionPointRec(mousePos, up->baseUpgradeRecs[i])){
                     up->isHovering[i] = true;
@@ -93,6 +120,7 @@ void updateUpgradeScreen(UpgradeScreen *up, Vector2 mousePos){
         case SELECTED:
             up->state = NOT_ACTIVE;
             break;
+        
 
     }
 }
@@ -100,20 +128,16 @@ void updateUpgradeScreen(UpgradeScreen *up, Vector2 mousePos){
 void drawUpgrades(UpgradeScreen *up, Font font){
 
     if(up->state != NOT_ACTIVE){
-        
-        float w = up->baseRec.width * up->openingProgress;
-        float h = up->baseRec.height * up->openingProgress;
-        float cx = 290 + 700/2.0f;
-        float cy = 160 + 400/2.0f;
-        Rectangle animatedRec = {cx - w/2.0f, cy - h/2.0f, w, h};
 
-        DrawTexturePro(upgradeScreenBaseTexture, (Rectangle){0,0, 112, 64}, animatedRec, (Vector2){0,0}, 0.0f, WHITE);
+        float pulse = (sinf(GetTime() * 2.0f) + 1.0f) / 2.0f;
+        float borderThickness = 2.0f + pulse * 4.0f;// oscillates between 2 and 6 (
 
-        if(up->state == DONE_OPENING){
-            for(int i = 0; i < 3; i++){
-                DrawTexturePro(upgradeTextures[up->upgrade[i]], (Rectangle){0,0,33,58}, up->upgradeRecs[i], (Vector2){0,0}, 0.0f, up->isHovering[i] ? (Color){254,231,97,255} : WHITE);
-            }
-        } 
+        for(int i = 0; i < 3; i++){
+             // Color){254,231,97,255}
+            DrawTexturePro(upgradeTextures[up->upgrade[i]], (Rectangle){0,0,33,58}, up->upgradeRecs[i], (Vector2){0,0}, 0.0f, Fade((up->isHovering[i] ? WHITE : WHITE), up->openingProgress[i]));
+            DrawRectangleLinesEx(up->upgradeRecs[i], borderThickness, Fade(up->isHovering[i]? WHITE: (Color){162, 38, 51}, up->openingProgress[i]));
+        }
+
 
     }
     

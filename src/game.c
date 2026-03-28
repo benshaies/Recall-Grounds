@@ -331,8 +331,8 @@ void gameUpdate(){
             gamePlayingUpdate();
             if(IsKeyPressed(KEY_U)){
                 game.state = UPGRADE_SCREEN;
-                upgradeScreen.state = OPENING;
                 createUpgrades(&upgradeScreen);
+                resetUpgradeUI(&upgradeScreen);
             }
             break;
         case DEAD:
@@ -341,11 +341,11 @@ void gameUpdate(){
             updateUpgradeScreen(&upgradeScreen, mousePos);
 
             if(upgradeScreen.selectedUpgrade != -1){
-                    if(applyPlayerUpgrade(&player, upgradeScreen.selectedUpgrade)){
-                        game.state = PLAYING;
-                        upgradeScreen.selectedUpgrade = -1;
-                    }
+                if(applyPlayerUpgrade(&player, upgradeScreen.selectedUpgrade)){
+                    game.state = PLAYING;
+                    upgradeScreen.selectedUpgrade = -1;
                 }
+            }
             break;
         case TESTING:
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -443,18 +443,18 @@ void gamePlayingDraw(){
         DrawText((TextFormat("%d", game.score)), 1150, 5, 50, WHITE);
        
         if(debugMode){
-            switch(player.state){
-                case NOTHING:
-                    DrawText("NOTHING", 0,0, 50, GREEN);
+            switch(upgradeScreen.state){
+                case NOT_ACTIVE:
+                    DrawText("NOT_ACTIVE", 0,0, 50, GREEN);
                     break;
-                case PULLING_IN:
-                    DrawText("PULLING_IN", 0,0, 50, GREEN);
+                case OPENING:
+                    DrawText("OPENING", 0,0, 50, GREEN);
                     break;
-                case HURT:
-                    DrawText("HURT", 0,0, 50, GREEN);
+                case DONE_OPENING:
+                    DrawText("DONE_OPENING", 0,0, 50, GREEN);
                     break;
-                case IMMUNITY:
-                    DrawText("IMMUNITY", 0,0, 50, GREEN);
+                case SELECTED:
+                    DrawText("SELECTED", 0,0, 50, GREEN);
                     break;
             }
         }
