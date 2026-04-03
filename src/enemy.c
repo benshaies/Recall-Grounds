@@ -4,10 +4,10 @@
 #include "../headers/textures.h"
 
 
-float distanceFromPlayerRadius = 200;
+float distanceFromPlayerRadius = 250;
 float enemyMeleeAttackRadius = 100.0f;
 
-void enemyInit(Enemy enemy[], Vector2 playerPos, int type){
+void enemyInit(Enemy enemy[], Vector2 playerPos, int type, int scoreMilestone){
     for (int i = 0; i < ENEMY_NUM; i++){
         if(!enemy[i].active){
 
@@ -23,7 +23,6 @@ void enemyInit(Enemy enemy[], Vector2 playerPos, int type){
             enemy[i].dir = Vector2Normalize((Vector2){playerPos.x - enemy[i].pos.x, playerPos.y - enemy[i].pos.y});
             enemy[i].active = true;
             
-            enemy[i].baseHealth = 100.0f;
             enemy[i].state = NOT_HIT;
             enemy[i].knockbackDir = (Vector2){0,0};
             
@@ -41,23 +40,39 @@ void enemyInit(Enemy enemy[], Vector2 playerPos, int type){
             enemy[i].attackCooldownTimer = 2.0f;
             enemy[i].inAttackCooldown = false;
 
+            int enemyHealthMultiplier = 0;
+            
+            if(scoreMilestone - 1 >= 2){
+                enemyHealthMultiplier = (scoreMilestone - 1)/2;
+            }
+            
+            if(enemyHealthMultiplier == 0){
+                enemy[i].healthBarColor = WHITE;
+            }
+            else if(enemyHealthMultiplier == 1){
+                enemy[i].healthBarColor = (Color){254, 174, 52, 255};
+            }
+            else if(enemyHealthMultiplier == 2){
+                enemy[i].healthBarColor = (Color){162, 38, 51, 255};
+            }
+            else if(enemyHealthMultiplier >= 3){
+                enemy[i].healthBarColor = (Color){181, 80, 136, 255};
+            }
             
             if(type == 1){ // Normal
                 animationInit(&enemy[i].anim, 0, enemyIdleTexture, 16, 4, 0, 0);
                 enemy[i].speed = GetRandomValue(3,4);
 
-                enemy[i].health = 150.0f;
+                enemy[i].health = 150.0f + (50 * enemyHealthMultiplier);
+                enemy[i].baseHealth = enemy[i].health;
             }
             else if(enemy[i].type == 2){ //Shield enemy
                 animationInit(&enemy[i].anim, 0, enemy2RunTexture, 16, 9, 0, 0);
                 enemy[i].speed = GetRandomValue(2,3);
 
-                enemy[i].health = 50.0f;
+                enemy[i].health = 50.0f + (50 * enemyHealthMultiplier);
+                enemy[i].baseHealth = enemy[i].health;
             }
-            else if(enemy[i].type == 3){ //Explodes when dead
-
-            }
-            
             break;
         }
     }
@@ -125,7 +140,7 @@ int enemyUpdate(Enemy enemy[], Rectangle playerRec, Weapon axe, Vector2 playerPo
                 
                 float damageMultiplier = 1.0f;
                 if(axe.state == 3){
-                    damageMultiplier = 1.5f;
+                    damageMultiplier = 1.75f;
                 }
 
                 if(enemy[i].type == 1 || (enemy[i].type == 2 && axe.state == RECALL)){
@@ -261,7 +276,7 @@ void enemyDraw(Enemy enemy[]){
                 }
             }
 
-            DrawRectangle(enemy[i].rec.x, enemy[i].rec.y - 50, (int)(enemy[i].rec.width * (enemy[i].health/enemy[i].baseHealth)), 10, WHITE);
+            DrawRectangle(enemy[i].rec.x, enemy[i].rec.y - 50, (int)(enemy[i].rec.width * (enemy[i].health/enemy[i].baseHealth)), 12.5, enemy[i].healthBarColor);
         }
     }
 }

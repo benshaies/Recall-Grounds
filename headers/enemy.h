@@ -40,12 +40,14 @@
         bool inAttackCooldown;
 
         int type;
+
+        Color healthBarColor;
         
     }Enemy;
 
     
 
-    void enemyInit(Enemy enemy[], Vector2 playerPos, int type);
+    void enemyInit(Enemy enemy[], Vector2 playerPos, int type, int scoreMilestone);
 
     void enemyFollowPlayer(Enemy enemy[], Vector2 playerPos, int i);
 

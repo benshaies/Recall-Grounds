@@ -231,7 +231,7 @@ bool applyPlayerUpgrade(Player *player, Upgrades selectedUpgrade){
             return true;
         case INCREASED_DAMAGE:
             player->upgradeLevels[INCREASED_DAMAGE]++;
-            player->axe.damage += 20;
+            player->axe.damage += 25;
             return true;
         case INCREASE_PLAYER_SPEED:
             player->upgradeLevels[INCREASE_PLAYER_SPEED]++;

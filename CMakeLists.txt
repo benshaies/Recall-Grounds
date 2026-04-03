@@ -25,7 +25,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 else()
     # Linux includes and libs
     include_directories("/home/benja/raylib/src")
-    link_directories("/home/benja/raylib")
+    link_directories("/home/benja/raylib/src")
 
     set(PLATFORM_LIBS
         raylib

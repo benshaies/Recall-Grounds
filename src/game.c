@@ -249,14 +249,7 @@ void gamePlayingUpdate(){
         if(startGame){
             spawnEnemies();
         }
-
-        //Simple debug enemy spawner
-        if(IsKeyPressed(KEY_G)){
-            enemyInit(enemy, player.pos, 2);
-        }
-        if(IsKeyPressed(KEY_F)){
-            enemyInit(enemy, player.pos, 1);
-        }
+        
         if(IsKeyPressed(KEY_F1)){
             debugMode = !debugMode;
         }
@@ -337,7 +330,7 @@ void gameUpdate(){
                 createUpgrades(&upgradeScreen, player.upgradeLevels[IMMUNE_WHILE_PULLING_IN] == 1, player.lives == 6);
                 resetUpgradeUI(&upgradeScreen);
             }
-            if(game.score >= (game.scoreThresholdNum * 150)){
+            if(game.score >= (game.scoreThresholdNum * 125)){
                 startUpgrades = true;
                 game.scoreThresholdNum++;
             }
@@ -365,12 +358,14 @@ void gameUpdate(){
 void spawnEnemies(){
     game.enemySpawnTimer += GetFrameTime();
     if(game.enemySpawnTimer >= enemySpawnTime){
+
+        //25 percent chang of spawning shield enemy
         int random = GetRandomValue(1,4);
         if(random == 4){
-            enemyInit(enemy, player.pos, 2);
+            enemyInit(enemy, player.pos, 2, game.scoreThresholdNum);
         }
         else{
-            enemyInit(enemy, player.pos, 1);
+            enemyInit(enemy, player.pos, 1, game.scoreThresholdNum);
         }
         game.enemySpawnTimer = 0;
     }
