@@ -93,6 +93,17 @@ int bounceCount = 0;
 
 Font font;
 
+TimedEvent displayTimeSurvied;
+
+TimedEvent displayEnemiesKilled;
+TimedEvent displayScore;
+
+Rectangle quitButtonRec;
+Color quitButtonColor = (Color) {24, 20, 37, 255};
+Color secondaryColor = (Color){232, 183, 150, 255};
+Rectangle playAgainButtonRec;
+
+
 
 void gameInit(){
     InitWindow(GAME_WIDTH, GAME_HEIGHT, "Project Recall");  
@@ -100,7 +111,7 @@ void gameInit(){
 
     font = LoadFontEx("../PixeloidSans-Bold.ttf", 64, 0, 0);
 
-    game.state = DEAD;
+    game.state = PLAYING;
     memset(&ps, 0, sizeof(ParticleSystem));
 
     texturesLoad();
@@ -140,6 +151,11 @@ void gameInit(){
     game.timeSurvived = 0.0f;
 
     upgradeStructInit(&upgradeScreen);
+
+    //Define Reset timed event stuff
+    resetTimedEvent(&displayTimeSurvied, 1.5f);
+    resetTimedEvent(&displayEnemiesKilled, 1.5f);
+    resetTimedEvent(&displayScore, 2.0f);
 }
 
 void cameraShake(){
@@ -281,6 +297,10 @@ void gamePlayingUpdate(){
             debugMode = !debugMode;
         }
 
+        if(IsKeyPressed(KEY_L)){
+            game.state = DEAD;
+        }
+
         int enemyUpdateReturn = enemyUpdate(enemy, player.rec, player.axe, player.pos, game.colliderRecs, game.colliderCount, &ps);
         //Returns -1 - Enemy hit
         //Returns 1 - Enemy dead
@@ -357,7 +377,7 @@ void gameUpdateDeadScreen(){
         bounceCount++;
     }
 
-    if(bounceCount >= 5){
+    if(bounceCount >= 4){
         gameOverRec.y = 160;
         hasFallen = true;
         gameOverRecVelY = 0.0f;
@@ -366,6 +386,14 @@ void gameUpdateDeadScreen(){
 
     //Update rec
     gameOverRec.y += gameOverRecVelY;
+
+    if(hasFallen){
+        if(updateTimedEvent(&displayTimeSurvied)){
+            if(updateTimedEvent(&displayEnemiesKilled)){
+                updateTimedEvent(&displayScore);
+            }
+        }
+    }
 }
 
 void gameUpdate(){
@@ -396,6 +424,8 @@ void gameUpdate(){
             break;
         case DEAD:
             gameUpdateDeadScreen();
+            updateParticles(&ps);
+            cameraShake();
             break;
         case UPGRADE_SCREEN:
             updateUpgradeScreen(&upgradeScreen, mousePos);
@@ -410,6 +440,25 @@ void gameUpdate(){
         case TESTING:
             break;
     }
+}
+
+void resetTimedEvent(TimedEvent *event, float delay){
+    event->triggered = false;
+    event->delay = delay;
+    event->timer = 0.0f;
+    event->particleTriggered = false;
+}
+
+bool updateTimedEvent(TimedEvent *event){
+    if(!event->triggered){
+        event->timer += GetFrameTime();
+
+        if(event->timer >= event->delay){
+            event->triggered = true;
+        }
+    }
+
+    return event->triggered;
 }
 
 void spawnEnemies(){
@@ -483,7 +532,10 @@ void gamePlayingDraw(){
 
             enemyDraw(enemy, game.state == UPGRADE_SCREEN);
 
-            drawParticles(&ps);
+            if(game.state == PLAYING){
+                drawParticles(&ps);
+            }
+            
 
             if(debugMode){
                 drawColliderRecs();
@@ -508,7 +560,10 @@ void gamePlayingDraw(){
         }
 
         //Score display
-        DrawText((TextFormat("%d", game.score)), 1150, 5, 50, WHITE);
+        if(game.state != DEAD){
+            DrawText((TextFormat("%d", game.score)), 1150, 5, 50, WHITE);
+        }
+        
        
         if(debugMode){
             switch(upgradeScreen.state){
@@ -529,10 +584,66 @@ void gamePlayingDraw(){
 }
 
 void gameDeadScreenDraw(){
+
+    DrawRectangle(0,0, 1280, 720, Fade(BLACK, 0.4));
+
     DrawTexturePro(gameOverTexture, (Rectangle){0,0,80, 64}, gameOverRec, (Vector2){0,0}, 0.0f, WHITE);
     DrawTextEx(font, "GAME OVER", (Vector2){gameOverRec.x+ 60, gameOverRec.y + 20}, 64, 5, (Color){162, 38, 51, 255});
-    DrawTextEx(font, "Time Survived:", (Vector2){gameOverRec.x + 30, gameOverRec.y + 100}, 30, 2, (Color){24, 20, 37, 255});
-    DrawTextEx(font, "Enemies Killed:", (Vector2){gameOverRec.x + 30, gameOverRec.y + 150}, 30, 2, (Color){24, 20, 37, 255});
+    
+    DrawTextEx(font, "Time Survived:", (Vector2){gameOverRec.x + 30, gameOverRec.y + 100}, 30, 2, quitButtonColor);
+
+    DrawTextEx(font, "Enemies Killed:", (Vector2){gameOverRec.x + 30, gameOverRec.y + 150}, 30, 2, quitButtonColor);
+
+
+    DrawTextEx(font, "FINAL SCORE", (Vector2){gameOverRec.x + 125, gameOverRec.y + 210}, 34, 3, quitButtonColor);
+
+    if(displayTimeSurvied.triggered){
+        int minutes = (int)game.timeSurvived / 60;
+        int secs = (int)game.timeSurvived % 60;
+        
+        DrawTextEx(font, TextFormat("%d:%02d", minutes, secs), (Vector2){gameOverRec.x + 300, gameOverRec.y + 100}, 30, 2,WHITE);
+        if(!displayTimeSurvied.particleTriggered){
+            spawnParticlesExpandingRing(&ps, (Vector2){gameOverRec.x + 300+ 25, gameOverRec.y + 100 + 10}, 0.5, WHITE, 5, 5, 50);
+            screenShake = screenShakeFrameBase + 10;
+            displayTimeSurvied.particleTriggered = true;
+        }
+        
+    }
+
+    if(displayEnemiesKilled.triggered){
+        DrawTextEx(font, TextFormat("%d", game.enemiesKilled), (Vector2){gameOverRec.x + 300, gameOverRec.y + 150}, 30, 2,WHITE);
+        if(!displayEnemiesKilled.particleTriggered){
+            spawnParticlesExpandingRing(&ps, (Vector2){gameOverRec.x + 300 + 10, gameOverRec.y + 150 + 5}, 0.5, WHITE, 5, 5, 50);
+            screenShake = screenShakeFrameBase + 10;
+            displayEnemiesKilled.particleTriggered = true;
+        }
+    }
+
+    if(displayScore.triggered){
+        DrawTextEx(font, TextFormat("%d", game.score), (Vector2){gameOverRec.x + 225, gameOverRec.y + 250}, 50, 3, WHITE);
+
+        if(!displayScore.particleTriggered){
+            spawnParticlesExpandingRing(&ps, (Vector2){gameOverRec.x + 225 + 10, gameOverRec.y + 250 + 10}, 0.75, WHITE, 5, 15, 50);
+            screenShake = screenShakeFrameBase + 10;
+            displayScore.particleTriggered = true;
+        }
+    }
+
+    if(displayScore.triggered){
+        quitButtonRec = (Rectangle){gameOverRec.x + 50, gameOverRec.y + 300, 150, 60};
+        playAgainButtonRec = (Rectangle){gameOverRec.x + 300, gameOverRec.y + 300, 150, 60};
+
+        DrawRectangleRounded(quitButtonRec, 0.5, 1, quitButtonColor);
+        DrawRectangleRoundedLinesEx(quitButtonRec, 0.5, 1, 2.5, secondaryColor);
+
+        DrawRectangleRounded(playAgainButtonRec, 0.5, 1, quitButtonColor);
+        DrawRectangleRoundedLinesEx(playAgainButtonRec, 0.5, 1, 2.5, secondaryColor);
+
+        DrawTextEx(font, "QUIT", (Vector2){quitButtonRec.x + 25, quitButtonRec.y + 10}, 40, 2, WHITE);
+        DrawTextEx(font, "PLAY\nAGAIN", (Vector2){playAgainButtonRec.x + 25, playAgainButtonRec.y}, 30, 2, WHITE);
+    }
+
+    
     
 }
 
@@ -551,6 +662,7 @@ void gameDraw(){
             case DEAD:
                 gamePlayingDraw();
                 gameDeadScreenDraw();
+                drawParticles(&ps);
                 break;  
             case UPGRADE_SCREEN:
                 gamePlayingDraw();

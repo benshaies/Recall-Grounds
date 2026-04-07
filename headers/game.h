@@ -14,6 +14,13 @@
         TESTING,
     }GameState;
 
+    typedef struct{
+        float timer;
+        float delay;
+        bool triggered;
+        bool particleTriggered;
+    }TimedEvent;
+
 
     typedef struct{
         float enemySpawnTimer;
@@ -39,6 +46,10 @@
     void gameSetFullscreen();
 
     void gameUpdate();
+
+    void resetTimedEvent(TimedEvent *event, float delay);
+
+    bool updateTimedEvent(TimedEvent *event);
 
     void gameResolutionDraw();
 
