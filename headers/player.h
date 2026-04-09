@@ -5,6 +5,14 @@
 #include "animation.h"
 #include "raylib.h"
 
+#define AXE_WIDTH 50
+#define AXE_HEIGHT 50
+
+#define AXE_SPEED 10
+#define AXE_RECALL_SPEED 13
+
+#define PLAYER_SPEED 5.0
+
 typedef enum {
   NOTHING,
   PULLING_IN,
@@ -22,7 +30,7 @@ typedef enum {
   THROWN,
   DONE_THROW,
   RECALL,
-} State2;
+} State2; // Axe State
 
 typedef struct {
   Vector2 pos;
@@ -63,6 +71,7 @@ typedef struct {
   // Animations
   Animation playerIdleAnim;
   Animation playerSideAnim;
+  Animation playerDeadAnim;
   bool justThrown;
 
   // Animation related variables

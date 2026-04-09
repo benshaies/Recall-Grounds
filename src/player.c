@@ -29,6 +29,16 @@ int playerImmunityFramesBase = 20;
 Rectangle tempRec;
 
 void playerInit(Player *player, bool resetting) {
+  if (resetting) {
+    axeWidth = AXE_WIDTH;
+    axeHeight = AXE_HEIGHT;
+
+    axeBaseSpeed = AXE_SPEED;
+    axeRecallSpeed = AXE_RECALL_SPEED;
+
+    playerBaseSpeed = PLAYER_SPEED;
+  }
+
   player->pos = (Vector2){1280 / 2, 720 / 2};
   player->rec = (Rectangle){player->pos.x - player_width / 2,
                             player->pos.y - player_height / 2, player_width,
@@ -62,6 +72,7 @@ void playerInit(Player *player, bool resetting) {
     // Animations
     animationInit(&player->playerIdleAnim, 0, playerIdleTexture, 16, 4, 0, 0);
     animationInit(&player->playerSideAnim, 0, playerSideTexture, 16, 5, 0, 0);
+    animationInit(&player->playerDeadAnim, 0, playerDeadTexture, 16, 18, 0, 0);
   }
 
   // Aniamtion related variables

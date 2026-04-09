@@ -330,7 +330,7 @@ void gamePlayingUpdate() {
     // Returns 2 - Shield enemy hit during throw
 
     if (enemyUpdateReturn == -1) { // Enemy hit
-      screenShake = 15;
+      screenShake = screenShakeFrameBase;
       hitStopTimer = hitStopTime * 2;
     }
     // Enemy killed and spawn particles
@@ -433,6 +433,7 @@ void gameUpdateDeadScreen() {
 
   if (gameOverAnimationsDone && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     if (isHovering(playAgainButtonRec)) {
+      resetGame();
       game.state = PLAYING;
     }
 
@@ -746,4 +747,20 @@ void resetGame() {
   for (int i = 0; i < ENEMY_NUM; i++) {
     enemyDelete(enemy, i);
   }
+
+  // Reset game function
+  game.score = 0;
+  game.enemiesKilled = 0;
+  game.timeSurvived = 0.0f;
+
+  // Reset game over stuff
+  gameOverRec = (Rectangle){390, -400, 500, 400};
+  gameOverRecVelY = 0.0f;
+  hasFallen = false;
+  gameOverRecGravity = 1.5f;
+  bounceCount = 0;
+
+  resetTimedEvent(&displayTimeSurvied, 1.5);
+  resetTimedEvent(&displayEnemiesKilled, 1.5);
+  resetTimedEvent(&displayScore, 2.0);
 }
