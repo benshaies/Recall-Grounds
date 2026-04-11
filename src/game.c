@@ -98,10 +98,17 @@ TimedEvent displayTimeSurvied;
 TimedEvent displayEnemiesKilled;
 TimedEvent displayScore;
 
-Rectangle quitButtonRec;
+Rectangle quitButtonRec = {440, 460, 150, 60};
+Rectangle quitButtonRecBase = {440, 460, 150, 60};
+
 Color quitButtonColor = (Color){24, 20, 37, 255};
-Color secondaryColor = (Color){232, 183, 150, 255};
-Rectangle playAgainButtonRec;
+Color secondaryColor = (Color){115, 62, 57, 255};
+Color playAgainButtonColor = (Color){24, 20, 57, 255};
+Color buttonColor = (Color){24, 20, 37, 255};
+Color hightlightColor = (Color){115, 62, 57, 255};
+
+Rectangle playAgainButtonRec = {690, 460, 150, 60};
+Rectangle playAgainButtonRecBase = {690, 460, 150, 60};
 
 bool gameOverAnimationsDone = false;
 
@@ -434,14 +441,39 @@ void gameUpdateDeadScreen() {
     }
   }
 
-  if (gameOverAnimationsDone && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+  if (gameOverAnimationsDone) {
+
     if (isHovering(playAgainButtonRec)) {
-      resetGame();
-      game.state = PLAYING;
+      playAgainButtonRec = (Rectangle){
+          .x = playAgainButtonRecBase.x - 2.5,
+          .y = playAgainButtonRecBase.y - 2.5,
+          .width = playAgainButtonRecBase.width + 5,
+          .height = playAgainButtonRecBase.height + 5,
+      };
+      playAgainButtonColor = hightlightColor;
+
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        resetGame();
+        game.state = PLAYING;
+      }
+
+    } else {
+      playAgainButtonRec = playAgainButtonRecBase;
+      playAgainButtonColor = buttonColor;
     }
 
     if (isHovering(quitButtonRec)) {
-      game.state = MAIN_MENU;
+      quitButtonColor = hightlightColor;
+      quitButtonRec = (Rectangle){
+          .x = quitButtonRecBase.x - 2.5,
+          .y = quitButtonRecBase.y - 2.5,
+          .width = quitButtonRecBase.width + 5,
+          .height = quitButtonRecBase.height + 5,
+      };
+
+    } else {
+      quitButtonColor = buttonColor;
+      quitButtonRec = quitButtonRecBase;
     }
   }
 }
@@ -643,15 +675,15 @@ void gameDeadScreenDraw() {
 
   DrawTextEx(font, "Time Survived:",
              (Vector2){gameOverRec.x + 30, gameOverRec.y + 100}, 30, 2,
-             quitButtonColor);
+             (Color){24, 20, 37, 255});
 
   DrawTextEx(font, "Enemies Killed:",
              (Vector2){gameOverRec.x + 30, gameOverRec.y + 150}, 30, 2,
-             quitButtonColor);
+             (Color){24, 20, 37, 255});
 
   DrawTextEx(font, "FINAL SCORE",
              (Vector2){gameOverRec.x + 125, gameOverRec.y + 210}, 34, 3,
-             quitButtonColor);
+             (Color){24, 20, 37, 255});
 
   if (displayTimeSurvied.triggered) {
     int minutes = (int)game.timeSurvived / 60;
@@ -697,15 +729,10 @@ void gameDeadScreenDraw() {
   }
 
   if (displayScore.triggered) {
-    quitButtonRec =
-        (Rectangle){gameOverRec.x + 50, gameOverRec.y + 300, 150, 60};
-    playAgainButtonRec =
-        (Rectangle){gameOverRec.x + 300, gameOverRec.y + 300, 150, 60};
-
     DrawRectangleRounded(quitButtonRec, 0.5, 1, quitButtonColor);
     DrawRectangleRoundedLinesEx(quitButtonRec, 0.5, 1, 2.5, secondaryColor);
 
-    DrawRectangleRounded(playAgainButtonRec, 0.5, 1, quitButtonColor);
+    DrawRectangleRounded(playAgainButtonRec, 0.5, 1, playAgainButtonColor);
     DrawRectangleRoundedLinesEx(playAgainButtonRec, 0.5, 1, 2.5,
                                 secondaryColor);
 
