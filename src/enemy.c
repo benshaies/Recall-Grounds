@@ -3,8 +3,8 @@
 #include "raymath.h"
 #include "stdio.h"
 
-float distanceFromPlayerRadius = 250;
-float enemyMeleeAttackRadius = 100.0f;
+float distanceFromPlayerRadius = 500;
+float enemyMeleeAttackRadius = 75;
 
 void enemyInit(Enemy enemy[], Vector2 playerPos, int type, int scoreMilestone) {
   for (int i = 0; i < ENEMY_NUM; i++) {
@@ -212,8 +212,8 @@ void enemyAttackUpdate(Enemy enemy[], Vector2 playerPos, int i) {
     Vector2 dirToPlayer = Vector2Normalize(
         (Vector2){playerPos.x - enemy[i].pos.x, playerPos.y - enemy[i].pos.y});
     enemy[i].attackRec =
-        (Rectangle){enemy[i].pos.x + dirToPlayer.x * 100,
-                    enemy[i].pos.y + dirToPlayer.y * 100, 50, 50};
+        (Rectangle){enemy[i].pos.x + dirToPlayer.x * 75,
+                    enemy[i].pos.y + dirToPlayer.y * 75, 50, 50};
   }
 
   if (enemy[i].isAttacking) {

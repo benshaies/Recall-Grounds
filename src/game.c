@@ -142,7 +142,7 @@ void gameInit() {
 
   font = LoadFontEx("../PixeloidSans-Bold.ttf", 64, 0, 0);
 
-  game.state = PLAYING;
+  game.state = MAIN_MENU;
   memset(&ps, 0, sizeof(ParticleSystem));
 
   texturesLoad();
@@ -829,8 +829,15 @@ void gameUpdate() {
 
   switch (game.state) {
   case MAIN_MENU:
+    if (IsKeyPressed(KEY_TAB)) {
+      game.state = PLAYING;
+    }
     break;
   case PLAYING:
+
+    if (IsKeyPressed(KEY_TAB)) {
+      game.state = MAIN_MENU;
+    }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
       game.state = PAUSED;
@@ -947,6 +954,8 @@ void gameDraw() {
 
   switch (game.state) {
   case MAIN_MENU:
+    DrawTexturePro(mainMenuTexture, (Rectangle){0, 0, 1280, 720},
+                   (Rectangle){0, 0, 1280, 720}, (Vector2){0, 0}, 0.0f, WHITE);
     break;
   case PLAYING:
     gamePlayingDraw();

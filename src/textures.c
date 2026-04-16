@@ -11,6 +11,7 @@ Texture2D heartTexture, heartHalfTexture, heartEmptyTexture;
 Texture2D upgradeScreenBaseTexture;
 Texture2D upgradeTextures[NUMBER_OF_UPGRADES];
 Texture2D gameOverTexture;
+Texture2D mainMenuTexture;
 
 void texturesLoad() {
   playerIdleTexture = LoadTexture("../assets/playerIdle.png");
@@ -53,6 +54,8 @@ void texturesLoad() {
 
   gameOverTexture = LoadTexture("../assets/gameOver.png");
 
+  mainMenuTexture = LoadTexture("../assets/mainMenu.png");
+
   SetTextureFilter(levelTilesetTexture, TEXTURE_FILTER_POINT);
 }
 
@@ -88,4 +91,6 @@ void texturesUnload() {
   UnloadTexture(upgradeScreenBaseTexture);
 
   UnloadTexture(gameOverTexture);
+
+  UnloadTexture(mainMenuTexture);
 }

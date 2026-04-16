@@ -13,6 +13,7 @@ extern Texture2D upgradeScreenBaseTexture, playerImmuneTexture;
 extern Texture2D upgradeTextures[NUMBER_OF_UPGRADES];
 extern Texture2D enemy1RunVariery2Texture, gameOverTexture;
 extern Texture2D playerDeadTexture;
+extern Texture2D mainMenuTexture;
 
 void texturesLoad();
 
